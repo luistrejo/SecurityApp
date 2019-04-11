@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">SecurityApp</string>
+    <string name="olvid_mi_contrase_a"><u>Olvidé mi contraseña.</u></string>
+    <string name="olvid_mi_contrasena"><u>Olvidé mi contraseña.</u></string>
+    <string name="nav_titulo_opciones">Opciones</string>
+    <string name="nav_acerca">Acerca de</string>
+    <string name="nav_compartir">Compartir App</string>
+    <string name="nav_salir">Salir</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>

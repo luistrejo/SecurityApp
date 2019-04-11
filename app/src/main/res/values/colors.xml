@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#008577</color>
+    <color name="colorPrimaryDark">#00574B</color>
+    <color name="colorAccent">#D81B60</color>
+    <color name="white">#FFFFFF</color>
+    <color name="primary_text_dark">#152650</color>
+    <color name="fondo2">#24547c</color>
+    <color name="fondo">#042b4b</color>
+    <color name="fondomapas">#1d2c4d</color>
+    <color name="fondomapas2">#3d5996</color>
+    <color name="seagreen">#2E8B57</color>
+    <color name="forestgreen">#228B22</color>
+    <color name="Eclipse">#544c8b</color>
+    <color name="UltraViolet">#ccf7c8</color>
+    <color name="QuetzalGreen">#006E6D</color>
+    <color name="DarkActionBar">#006E6D</color>
+    <color name="black">#000</color>
+</resources>

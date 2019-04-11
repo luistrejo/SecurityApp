@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/menu_seccion_1"
+            android:icon="@android:drawable/ic_dialog_alert"
+            android:title="Inicio"/>
+        <item
+            android:id="@+id/menu_seccion_2"
+            android:icon="@android:drawable/ic_dialog_alert"
+            android:title="Mis Circulos" />
+        <item
+            android:id="@+id/menu_seccion_3"
+            android:icon="@android:drawable/ic_dialog_alert"
+            android:title="Boton de Panico" />
+        <item
+            android:id="@+id/menu_seccion_4"
+            android:icon="@android:drawable/ic_dialog_alert"
+            android:title="Calendario" />
+    </group>
+
+    <item
+        android:id="@+id/navigation_subheader"
+        android:title="@string/nav_titulo_opciones">
+        <menu>
+            <item
+                android:id="@+id/menu_opcion_1"
+                android:title="@string/nav_acerca" />
+            <item
+                android:id="@+id/menu_opcion_share"
+                android:title="@string/nav_compartir" />
+            <item
+                android:id="@+id/menu_opcion_2"
+                android:title="@string/nav_salir" />
+        </menu>
+    </item>
+</menu>
