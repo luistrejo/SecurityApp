@@ -9,4 +9,7 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="mapbox_key">pk.eyJ1IjoibHVpc3RyZWpvIiwiYSI6ImNqNWJhamZ2NTBoczMycW1taGg1dnZsbjAifQ.t2uweldQ7LBMWxhrAyVP4w</string>
+    <string name="mapbox_style">mapbox://styles/luistrejo/cj93l2370mnfx2ss1yx8crodk</string>
+    <string name="title_activity_formulario_rutinas">FormularioRutinasActivity</string>
 </resources>

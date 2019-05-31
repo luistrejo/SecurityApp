@@ -1,108 +1,90 @@
 package jairfranco.com.tec2.pfran.calendario;
 
-import android.content.Intent;
+import android.Manifest;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.MenuItem;
 
-import com.google.android.material.navigation.NavigationView;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.geometry.LatLng;
 
-import androidx.appcompat.app.ActionBar;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener, GoogleApiClient.OnConnectionFailedListener,
+        GoogleApiClient.ConnectionCallbacks,
+        LocationListener {
     private Toolbar appbar;
-    private DrawerLayout drawerLayout;
-    private NavigationView navView;
-    private SparseArray<String> drawerFragments;
+    BottomNavigationView bottomNavigationView;
     private String fragmentCurrent = "";
+    private SparseArray<String> drawerFragments;
+    private LocationRequest locRequest;
+    private GoogleApiClient apiClient;
+    private String userID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        FirebaseDatabaseControl.setUpDataBase();
+
         appbar = findViewById(R.id.toolbar);
         setSupportActionBar(appbar);
-        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
+        bottomNavigationView.setOnNavigationItemSelectedListener(this);
+        Mapbox.getInstance(this, getString(R.string.mapbox_key));
+        setInitialFragment();
 
-        navView = findViewById(R.id.navview);
-        setupNavigationDrawer();
+        SharedPreferences prefs = getSharedPreferences("USERID", Context.MODE_PRIVATE);
+        userID = prefs.getString("key", null);
+
+        apiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addApi(LocationServices.API)
+                .build();
+
+        apiClient.connect();
+        enableLocationUpdates();
     }
 
-    private void setupNavigationDrawer() {
-        drawerLayout = findViewById(R.id.drawer_layout);
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        replaceFragment(drawerFragments.get(item.getItemId()));
+        return true;
+    }
+
+    private void setInitialFragment() {
         drawerFragments = new SparseArray<>();
-        drawerFragments.append(R.id.menu_seccion_1, HomeFragment.class.getName());
-        drawerFragments.append(R.id.menu_seccion_2, CirculosFragment.class.getName());
-        drawerFragments.append(R.id.menu_seccion_3, CalendarioFragment.class.getName());
+        drawerFragments.append(R.id.menu_home, HomeFragment.class.getName());
+        drawerFragments.append(R.id.menu_circulos, CirculosFragment.class.getName());
+        drawerFragments.append(R.id.menu_rutinas, RutinasFragment.class.getName());
+        drawerFragments.append(R.id.menu_mapa, MapaFragment.class.getName());
 
-        navView.setNavigationItemSelectedListener(
-                menuItem -> {
-                    doSelectDrawerItemById(menuItem.getItemId());
-                    return true;
-                });
+
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.add(R.id.main_container, new HomeFragment());
+        fragmentCurrent = drawerFragments.get(0);
+        fragmentTransaction.commit();
     }
 
-    private void doSelectDrawerItemById(int itemId) {
-        switch (itemId) {
-//            case R.id.menu_seccion_3:
-//                startActivity(new Intent(this, CalendarioFragment.class));
-//                drawerLayout.closeDrawer(GravityCompat.START);
-//                return;
-//            case R.id.menu_seccion_2:
-//                startActivity(new Intent(this, CirculosFragment.class));
-//                drawerLayout.closeDrawer(GravityCompat.START);
-//                return;
-//            case R.id.menu_seccion_3:
-//                if (user == null) {
-//                    login();
-//                    return;
-//                }
-//                startActivity(new Intent(this, GrabarRuta.class));
-//                drawerLayout.closeDrawer(GravityCompat.START);
-//                return;
-            case R.id.menu_opcion_share:
-                Intent shareIntent = new Intent(Intent.ACTION_SEND);
-                shareIntent.setType("text/plain");
-                shareIntent.putExtra(Intent.EXTRA_TEXT, "SecurityApp, la app para proteger a los que mas quieres. Descargala ahora:");
-                startActivity(Intent.createChooser(shareIntent, "Compartir SecurityApp"));
-                drawerLayout.closeDrawer(GravityCompat.START);
-                return;
-            case R.id.menu_opcion_2:
-                //login();
-                return;
-        }
-        if (itemId == R.id.menu_seccion_1) {
-            doUpdateTitle("SecurityApp");
-        } else {
-            doUpdateTitle(navView.getMenu().findItem(itemId).getTitle().toString());
-        }
-
-        if (itemId == R.id.menu_seccion_2) {
-            appbar.setElevation(0);
-        } else {
-            appbar.setElevation(10);
-        }
-
-
-        if (drawerFragments.get(itemId).equals(HomeFragment.class.getName())) {
-            Log.d("FRAGMENTOS", "Es el mapa, no hacer nada");
-            doReplaceFragment(drawerFragments.get(itemId), null);
-        } else {
-            doReplaceFragment(drawerFragments.get(itemId), null);
-        }
-            
-        navView.getMenu().findItem(itemId).setChecked(true);
-        drawerLayout.closeDrawer(GravityCompat.START);
-    }
-
-    private void doReplaceFragment(String fname, Bundle extras) {
+    private void replaceFragment(String fname) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         Fragment current = getSupportFragmentManager().findFragmentByTag(fragmentCurrent);
 
@@ -118,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.w("FRAGMENTS", "SHOW: " + f);
             }
         } else {
-            f = Fragment.instantiate(this, fname, extras);
+            f = Fragment.instantiate(this, fname);
             if (current != null) {
                 transaction.hide(current);
             }
@@ -129,13 +111,68 @@ public class MainActivity extends AppCompatActivity {
         try {
             transaction.commitNowAllowingStateLoss();
         } catch (IllegalStateException e) {
-            Log.w("Error", "Oops, la aplicación se cerró antes terminar la carga inicial. No pasa nada, cuando la abras estará bien.");
+            Log.w("BusApp", "Oops, la aplicación se cerró antes terminar la carga inicial. No pasa nada, cuando la abras estará bien.");
         }
 
     }
 
-    private void doUpdateTitle(String sName) {
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setTitle(sName);
+    private void enableLocationUpdates() {
+        locRequest = new LocationRequest();
+        locRequest.setInterval(5000);
+        locRequest.setFastestInterval(5000);
+        locRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        new LocationSettingsRequest.Builder()
+                .addLocationRequest(locRequest)
+                .build();
+    }
+
+    private void startLocationUpdates() {
+        if (ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            LocationServices.FusedLocationApi.requestLocationUpdates(
+                    apiClient, locRequest, this);
+        }
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        startLocationUpdates();
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+
+        FirebaseDatabaseControl.getDatabaseReference()
+                .child("Users")
+                .child("Customers")
+                .child(userID)
+                .child("longitud")
+                .setValue(String.valueOf(latLng.getLongitude()));
+
+        FirebaseDatabaseControl.getDatabaseReference()
+                .child("Users")
+                .child("Customers")
+                .child(userID)
+                .child("latitud")
+                .setValue(String.valueOf(latLng.getLatitude()));
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        LocationServices.FusedLocationApi.removeLocationUpdates(
+                apiClient, this);
+        apiClient.disconnect();
     }
 }

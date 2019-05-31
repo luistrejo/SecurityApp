@@ -4,10 +4,11 @@ android {
     compileSdkVersion 28
     defaultConfig {
         applicationId "jairfranco.com.tec2.pfran.calendario"
-        minSdkVersion 16
+        minSdkVersion 21
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -24,30 +25,38 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    //noinspection GradleCompatible
-    implementation 'androidx.appcompat:appcompat:1.1.0-alpha04'
+
+    //ANDROID
+    implementation 'androidx.appcompat:appcompat:1.1.0-alpha05'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0-alpha05'
+    implementation 'com.google.android.material:material:1.0.0'
+    implementation 'com.android.support:design:28.1.0'
+    implementation 'androidx.recyclerview:recyclerview:1.0.0'
 
-    implementation 'androidx.recyclerview:recyclerview:1.1.0-alpha04'
-
-    //news
-    implementation 'com.google.firebase:firebase-core:16.0.8'
-    implementation 'com.google.firebase:firebase-config:16.5.0'
-    implementation 'com.google.firebase:firebase-database:16.1.0'
-    implementation 'com.google.firebase:firebase-auth:16.2.1'
-    implementation 'com.google.firebase:firebase-storage:16.1.0'
+    //FIREBASE
+    implementation 'com.google.firebase:firebase-core:16.0.9'
+    implementation 'com.google.firebase:firebase-config:17.0.0'
+    implementation 'com.google.firebase:firebase-database:17.0.0'
+    implementation 'com.google.firebase:firebase-auth:17.0.0'
+    implementation 'com.google.firebase:firebase-storage:17.0.0'
     implementation 'com.google.gms:google-services:4.2.0'
 
-    //news 2
-    implementation 'cc.cloudist.acplibrary:library:1.2.1'
-    implementation 'com.google.android.material:material:1.0.0'
+    //MAPBOX
+    implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:7.3.2'
+    implementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-annotation-v7:0.6.0'
+    implementation 'com.google.android.gms:play-services-location:16.0.0'
 
+    //QRCODE
+    implementation 'com.github.kenglxn.QRGen:android:2.5.0'
+    implementation 'me.dm7.barcodescanner:zxing:1.9'
 
-
+    implementation 'com.github.bumptech.glide:glide:4.9.0'
+    implementation 'id.zelory:compressor:2.1.0'
 
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test:runner:1.2.0-alpha03'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0-alpha03'
+    androidTestImplementation 'androidx.test:runner:1.2.0-beta01'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0-beta01'
 }
 apply plugin: 'com.google.gms.google-services'

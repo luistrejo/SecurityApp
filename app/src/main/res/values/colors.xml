@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#008577</color>
-    <color name="colorPrimaryDark">#00574B</color>
-    <color name="colorAccent">#D81B60</color>
+    <color name="colorPrimary">#f5f5f5</color>
+    <color name="colorPrimaryDark">#000070</color>
+    <color name="colorAccent">#fb8c00</color>
     <color name="white">#FFFFFF</color>
     <color name="primary_text_dark">#152650</color>
     <color name="fondo2">#24547c</color>
@@ -16,4 +16,7 @@
     <color name="QuetzalGreen">#006E6D</color>
     <color name="DarkActionBar">#006E6D</color>
     <color name="black">#000</color>
+
+    <color name="press">#ff9800</color>
+    <color name="notpress">#ffa726</color>
 </resources>

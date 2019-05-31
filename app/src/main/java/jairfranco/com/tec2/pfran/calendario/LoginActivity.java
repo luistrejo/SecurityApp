@@ -1,5 +1,6 @@
 package jairfranco.com.tec2.pfran.calendario;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 
 
@@ -8,7 +9,6 @@ import android.content.BroadcastReceiver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.telephony.PhoneNumberFormattingTextWatcher;
 import android.text.Editable;
@@ -45,8 +45,6 @@ import java.util.concurrent.TimeUnit;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import cc.cloudist.acplibrary.ACProgressConstant;
-import cc.cloudist.acplibrary.ACProgressFlower;
 
 
 public class LoginActivity extends AppCompatActivity {
@@ -82,102 +80,104 @@ public class LoginActivity extends AppCompatActivity {
         editTextPhone = findViewById(R.id.txt_phone);
         editTextPass = findViewById(R.id.txt_passLog);
         mIngres = findViewById(R.id.btnIngresar);
-        mLossingPass = (TextView) findViewById(R.id.losspass);
-        mRegisterHere = (TextView) findViewById(R.id.mReg);
-        photoImageView = (ImageView) findViewById(R.id.imageView);
+        mLossingPass = findViewById(R.id.losspass);
+        mRegisterHere = findViewById(R.id.mReg);
+        photoImageView = findViewById(R.id.imageView);
 
 
-        final ACProgressFlower dialog = new ACProgressFlower.Builder(this)
-                .direction(ACProgressConstant.DIRECT_CLOCKWISE)
-                .themeColor(Color.WHITE)
-                .text("Espere...")
-                .fadeColor(Color.DKGRAY).build();
+        ProgressDialog dialog = new ProgressDialog(this);
+        dialog.setTitle("Login");
+        dialog.setMessage("Espere...");
+        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        dialog.setCancelable(false);
 
         //Glide.with(this).load(R.drawable.splash_water).into(photoImageView);
         // mRegisterHere.setPaintFlags(Paint.UNDERLINE_TEXT_FLAG);
 
-        mIngres.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String gettingPhone = editTextPhone.getText().toString();
-                String newString = gettingPhone.replace("(", "").replace(")", "").replace("-", "").replace(" ", "");
-                String phone = lada + newString;
-                dialog.show();
+        mIngres.setOnClickListener(v -> {
+            String gettingPhone = editTextPhone.getText().toString();
+            String newString = gettingPhone.replace("(", "").replace(")", "").replace("-", "").replace(" ", "");
+            String phone = lada + newString;
+            dialog.show();
 
-                String gettingPass = editTextPass.getText().toString();
-                if (!TextUtils.isEmpty(gettingPhone) && !TextUtils.isEmpty(gettingPass) && gettingPhone != null && gettingPass != null) {
-                    final Query userUID = FirebaseDatabase.getInstance().getReference().child("Users").child("Customers").orderByChild("phone").equalTo(phone);
-                    userUID.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            if (dataSnapshot.getChildrenCount() > 0) {
+            String gettingPass = editTextPass.getText().toString();
+            if (!TextUtils.isEmpty(gettingPhone) && !TextUtils.isEmpty(gettingPass) && gettingPhone != null && gettingPass != null) {
+                final Query userUID = FirebaseDatabase.getInstance().getReference().child("Users").child("Customers").orderByChild("phone").equalTo(phone);
+                userUID.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.getChildrenCount() > 0) {
 
-                                userUID.addChildEventListener(new ChildEventListener() {
-                                    @Override
-                                    public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
+                            userUID.addChildEventListener(new ChildEventListener() {
+                                @Override
+                                public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
 
 
-                                        if (dataSnapshot.child("password").getValue().equals(editTextPass.getText().toString())) {
+                                    if (dataSnapshot.child("password").getValue().equals(editTextPass.getText().toString())) {
 
-                                            //Logueo Exitoso
-                                            //Guardar UID como variable globar aquiii!!!
+                                        //Logueo Exitoso
+                                        //Guardar UID como variable globar aquiii!!!
 
-                                            SharedPreferences gameSettings = getSharedPreferences(PREFERENCE_FILENAME, MODE_PRIVATE);
-                                            SharedPreferences.Editor prefEditor = gameSettings.edit();
-                                            //valores agregados
-                                            prefEditor.putString("UID", dataSnapshot.getKey());
+                                        SharedPreferences gameSettings = getSharedPreferences(PREFERENCE_FILENAME, MODE_PRIVATE);
+                                        SharedPreferences.Editor prefEditor = gameSettings.edit();
+                                        //valores agregados
+                                        prefEditor.putString("UID", dataSnapshot.getKey());
 
-                                            prefEditor.commit();
-
-
-                                            final Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                                            startActivity(intent);
-                                            finish();
-                                            //  Toast.makeText(MainActivity.this, "Logueo Exitoso", Toast.LENGTH_SHORT).show();jkhdldf
+                                        prefEditor.commit();
 
 
-                                        } else {
-                                            dialog.dismiss();
-                                            Toast.makeText(LoginActivity.this, "Contraseña incorrecta", Toast.LENGTH_SHORT).show();
-                                        }
+                                        //GUARDAMOS EL USERID PARA FUTUROS USOS INTERNOS EN UN SHARED PREFERENCES
+                                        SharedPreferences.Editor editor = getSharedPreferences("USERID", MODE_PRIVATE).edit();
+                                        editor.putString("key", dataSnapshot.child("id").getValue().toString());
+                                        editor.apply();
+
+                                        final Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                        startActivity(intent);
+                                        finish();
+                                        //  Toast.makeText(MainActivity.this, "Logueo Exitoso", Toast.LENGTH_SHORT).show();jkhdldf
+
+
+                                    } else {
+                                        dialog.dismiss();
+                                        Toast.makeText(LoginActivity.this, "Contraseña incorrecta", Toast.LENGTH_SHORT).show();
+                                    }
 //                                    Toast.makeText(MainActivity.this, ""+dataSnapshot.getKey(), Toast.LENGTH_SHORT).show();
 //                                    Toast.makeText(MainActivity.this, ""+dataSnapshot.child("password").getValue(), Toast.LENGTH_SHORT).show();
-                                    }
+                                }
 
-                                    @Override
-                                    public void onChildChanged(DataSnapshot dataSnapshot, String prevChildKey) {
-                                    }
+                                @Override
+                                public void onChildChanged(DataSnapshot dataSnapshot, String prevChildKey) {
+                                }
 
-                                    @Override
-                                    public void onChildRemoved(DataSnapshot dataSnapshot) {
-                                    }
+                                @Override
+                                public void onChildRemoved(DataSnapshot dataSnapshot) {
+                                }
 
-                                    @Override
-                                    public void onChildMoved(DataSnapshot dataSnapshot, String prevChildKey) {
-                                    }
+                                @Override
+                                public void onChildMoved(DataSnapshot dataSnapshot, String prevChildKey) {
+                                }
 
-                                    @Override
-                                    public void onCancelled(DatabaseError databaseError) {
-                                    }
-                                });
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+                                }
+                            });
 
 
-                            } else {
-                                Toast.makeText(LoginActivity.this, "El telefono no esta registrado", Toast.LENGTH_SHORT).show();
-                                dialog.dismiss();
-                            }
+                        } else {
+                            Toast.makeText(LoginActivity.this, "El telefono no esta registrado", Toast.LENGTH_SHORT).show();
+                            dialog.dismiss();
                         }
+                    }
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                        }
-                    });
+                    }
+                });
 
-                } else {
-                    Toast.makeText(LoginActivity.this, "Debes llenar todos los campos", Toast.LENGTH_SHORT).show();
-                    dialog.dismiss();
-                }
+            } else {
+                Toast.makeText(LoginActivity.this, "Debes llenar todos los campos", Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
             }
         });
 
@@ -193,73 +193,63 @@ public class LoginActivity extends AppCompatActivity {
 
         });
 
-        mRegisterHere.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.show();
-                input.setInputType(InputType.TYPE_CLASS_NUMBER);
-                input.setFilters(new InputFilter[]{new InputFilter.LengthFilter(15)});
-                AlertDialog.Builder alertDialog = new AlertDialog.Builder(LoginActivity.this);
-                alertDialog.setCancelable(false);
-                dialog.dismiss();
-                alertDialog.setTitle("Registro");
-                alertDialog.setMessage("Ingrese su Numero");
+        mRegisterHere.setOnClickListener(v -> {
+            dialog.show();
+            input.setInputType(InputType.TYPE_CLASS_NUMBER);
+            input.setFilters(new InputFilter[]{new InputFilter.LengthFilter(15)});
+            AlertDialog.Builder alertDialog = new AlertDialog.Builder(LoginActivity.this);
+            alertDialog.setCancelable(false);
+            dialog.dismiss();
+            alertDialog.setTitle("Registro");
+            alertDialog.setMessage("Ingrese su Numero");
 
-                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.MATCH_PARENT);
-                input.setLayoutParams(lp);
-                alertDialog.setView(input);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.MATCH_PARENT);
+            input.setLayoutParams(lp);
+            alertDialog.setView(input);
 
-                alertDialog.setPositiveButton("Enviar",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog1, int which) {
+            alertDialog.setPositiveButton("Enviar",
+                    (dialog1, which) -> {
 
-                                nTel = input.getText().toString();
-                                final String newString = nTel.replace("(", "").replace(")", "").replace("-", "").replace(" ", "");
-                                phone = lada + newString;
-                                final Query telquery = FirebaseDatabase.getInstance().getReference().child("Users").child("Customers").orderByChild("phone").equalTo(phone);
+                        nTel = input.getText().toString();
+                        final String newString = nTel.replace("(", "").replace(")", "").replace("-", "").replace(" ", "");
+                        phone = lada + newString;
+                        final Query telquery = FirebaseDatabase.getInstance().getReference().child("Users").child("Customers").orderByChild("phone").equalTo(phone);
 
-                                telquery.addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                        if (newString.length() != 10) {
-                                            dialog.dismiss();
-                                            Toast.makeText(LoginActivity.this, "Ingresa un Telefono Valido.", Toast.LENGTH_SHORT).show();
-                                        } else {
-                                            if (dataSnapshot.getChildrenCount() >= 0) {
+                        telquery.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                if (newString.length() != 10) {
+                                    dialog.dismiss();
+                                    Toast.makeText(LoginActivity.this, "Ingresa un Telefono Valido.", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    if (dataSnapshot.getChildrenCount() >= 0) {
 
-                                                Toast.makeText(LoginActivity.this, "Codigo Enviado por SMS.", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(LoginActivity.this, "Codigo Enviado por SMS.", Toast.LENGTH_SHORT).show();
 
-                                                sendVerificationCode();
+                                        sendVerificationCode();
 
-                                                dialog.dismiss();
+                                        dialog.dismiss();
 
-                                            } else {
-                                                dialog.dismiss();
-                                                Toast.makeText(LoginActivity.this, "Este Telefono aun no se encuentra registrado ", Toast.LENGTH_SHORT).show();
-                                            }
-                                        }
+                                    } else {
+                                        dialog.dismiss();
+                                        Toast.makeText(LoginActivity.this, "Este Telefono aun no se encuentra registrado ", Toast.LENGTH_SHORT).show();
                                     }
-
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                                    }
-                                });
+                                }
                             }
 
-                        });
-
-                alertDialog.setNegativeButton("Cancelar",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog1, int which) {
-                                dialog1.cancel();
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
                             }
                         });
+                    });
 
-                alertDialog.show();
+            alertDialog.setNegativeButton("Cancelar",
+                    (dialog1, which) -> dialog1.cancel());
 
-            }
+            alertDialog.show();
+
         });
 
 
@@ -460,21 +450,14 @@ public class LoginActivity extends AppCompatActivity {
 
 
             alertDialog2.setPositiveButton("Aceptar",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog1, int which) {
-                            verfySingInCode();
-                            dialog1.cancel();
-                        }
-
+                    (dialog1, which) -> {
+                        verfySingInCode();
+                        dialog1.cancel();
                     });
 
 
             alertDialog2.setNegativeButton("Cancelar",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog1, int which) {
-                            dialog1.cancel();
-                        }
-                    });
+                    (dialog1, which) -> dialog1.cancel());
             alertDialog2.show();
         }
 
@@ -484,40 +467,37 @@ public class LoginActivity extends AppCompatActivity {
 
     private void signInWithPhoneAuthCredential(PhoneAuthCredential credential) {
         mAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
 
-                            //AQUI OBTIENE OTRO UID DIFERENTE
+                        //AQUI OBTIENE OTRO UID DIFERENTE
 
-                            //GUARDAR EL UID DEL USUARIO LOGUEADO
+                        //GUARDAR EL UID DEL USUARIO LOGUEADO
 
-                            /// String UIDtel = mAuth.getCurrentUser().getUid();
-                            //  task.getResult().getUser().getEmail();
-                            UIDtel = task.getResult().getUser().getUid();
-                            SharedPreferences gameSettings = getSharedPreferences(PREFERENCE_FILENAME, MODE_PRIVATE);
-                            SharedPreferences.Editor prefEditor = gameSettings.edit();
-                            //valores agregados
-                            prefEditor.putString("UID", UIDtel);
-                            prefEditor.commit();
+                        /// String UIDtel = mAuth.getCurrentUser().getUid();
+                        //  task.getResult().getUser().getEmail();
+                        UIDtel = task.getResult().getUser().getUid();
+                        SharedPreferences gameSettings = getSharedPreferences(PREFERENCE_FILENAME, MODE_PRIVATE);
+                        SharedPreferences.Editor prefEditor = gameSettings.edit();
+                        //valores agregados
+                        prefEditor.putString("UID", UIDtel);
+                        prefEditor.commit();
 
 
-                            final Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
-                            String dato = input.getText().toString(); //Obtienes el texto del EditText
-                            intent.putExtra("dato", dato);
-                            startActivity(intent);
-                            finish();
-                            return;
+                        final Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+                        String dato = input.getText().toString(); //Obtienes el texto del EditText
+                        intent.putExtra("dato", dato);
+                        startActivity(intent);
+                        finish();
+                        return;
 
 
-                            // ...
-                        } else {
-                            if (task.getException() instanceof FirebaseAuthInvalidCredentialsException) {
-                                Toast.makeText(getApplicationContext(),
-                                        "Codigo De Verificacion Incorrecto, Intente Nuevamente", Toast.LENGTH_LONG).show();
+                        // ...
+                    } else {
+                        if (task.getException() instanceof FirebaseAuthInvalidCredentialsException) {
+                            Toast.makeText(getApplicationContext(),
+                                    "Codigo De Verificacion Incorrecto, Intente Nuevamente", Toast.LENGTH_LONG).show();
 
-                            }
                         }
                     }
                 });
